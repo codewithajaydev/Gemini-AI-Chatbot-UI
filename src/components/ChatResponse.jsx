@@ -1,53 +1,41 @@
 import React from "react";
 
 const ChatResponse = ({ response }) => {
-  if (!response) return null;
+  if (!response?.candidates?.length) return null;
 
-  const { candidates, usageMetadata } = response;
+  // Get the first candidate's text
+  const text = response.candidates[0].content.parts[0].text;
 
-  // Take only the first candidate
-  const candidate = candidates?.[0];
+  // Split the text into lines (using period + space)
+  const lines = text.split(". ").filter(line => line.trim() !== "");
 
-  if (!candidate) return null;
+  const styles = {
+    container: {
+      maxWidth: "600px",
+      margin: "20px auto",
+      fontFamily: "Arial, sans-serif",
+    },
+    card: {
+      border: "1px solid #ccc",
+      padding: "15px",
+      borderRadius: "6px",
+      backgroundColor: "#f9f9f9",
+    },
+    list: {
+      paddingLeft: "20px",
+      lineHeight: "1.5",
+    },
+  };
 
   return (
-    <div className="container my-5">
-      <h3 className="mb-4 text-primary">AI Response</h3>
-
-      <div className="card mb-4 shadow-sm">
-        <div className="card-body">
-          <p className="card-text fs-5">{candidate.content.parts[0].text}</p>
-
-          {candidate?.citationMetadata?.citationSources?.length > 0 && (
-            <>
-              <h6 className="mt-3 text-secondary">Citations</h6>
-              <ul className="list-group list-group-flush">
-                {candidate.citationMetadata.citationSources.map((source, idx) => (
-                  <li className="list-group-item" key={idx}>
-                    <a href={source.uri} target="_blank" rel="noopener noreferrer" className="text-decoration-none">
-                      {source.uri}
-                    </a>{" "}
-                    <span className="badge bg-info text-dark">
-                      Indexes: {source.startIndex} - {source.endIndex}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
-        </div>
+    <div style={styles.container}>
+      <div style={styles.card}>
+        <ul style={styles.list}>
+          {lines.map((line, idx) => (
+            <li key={idx}>{line.trim()}.</li>
+          ))}
+        </ul>
       </div>
-
-      {usageMetadata && (
-        <div className="mt-4 p-3 border rounded bg-light">
-          <h5 className="text-secondary">Usage Metadata</h5>
-          <p>
-            <span className="badge bg-primary me-2">Prompt Tokens: {usageMetadata.promptTokenCount}</span>
-            <span className="badge bg-warning text-dark me-2">Response Tokens: {usageMetadata.candidatesTokenCount}</span>
-            <span className="badge bg-success">Total Tokens: {usageMetadata.totalTokenCount}</span>
-          </p>
-        </div>
-      )}
     </div>
   );
 };
